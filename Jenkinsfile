@@ -35,7 +35,7 @@ pipeline{
             
         }
         stage('codereviewSonarQube'){
-            agent any
+            agent {label 'Linux_SonarQube'}
             steps{
                 withSonarQubeEnv('mySonar'){
                     git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
