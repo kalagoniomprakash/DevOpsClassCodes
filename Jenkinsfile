@@ -5,7 +5,7 @@ pipeline{
       maven 'myMaven'
     }
     agent none
-    options([[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git/'], pipelineTriggers([githubPush()])])
+    options{[[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git/'], pipelineTriggers([githubPush()])]}
        stages{
         stage('checkout'){
             agent any
