@@ -1,57 +1,89 @@
 pipeline{
-    tools{
-        jdk 'myjava'
-        maven 'mymaven'
+    tools {
+      jdk 'JAVA_HOME'
+      git 'mygit'
+      maven 'myMaven'
     }
-    
     agent none
     stages{
-            stage('Compile'){
-                agent any
-                steps{
-                    sh 'mvn compile'
+        stage('checkout'){
+            agent any
+            steps{
+                git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
+            }
+            
+        }
+        stage('compile'){
+            agent any
+            steps{
+                sh 'mvn compile'
+                
+            }
+            
+        }
+        stage('codereview'){
+            agent any
+            steps{
+                sh 'mvn pmd:pmd'
+            }
+            post
+            {
+                success{
+                    pmd pattern: 'target/pmd.xml'
                 }
             }
-            stage('CodeReview'){
-                agent any
-                steps{
-                    sh 'mvn pmd:pmd'
+            
+        }
+        stage('codereviewSonarQube'){
+            agent any
+            steps{
+                withSonarQubeEnv('mySonar'){
+                    git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
+                    sh 'mvn sonar:sonar' 
                 }
-                post{
-                    always{
-                        pmd pattern: 'target/pmd.xml'
-                    }
-                }
+               
             }
-            stage('UnitTest'){
-                agent {label 'slave_win'}
-                steps{
-                    git 'https://github.com/devops-trainer/DevOpsClassCodes.git'
-                    bat 'mvn test'
-                }
-                post{
-                    always{
-                        junit 'target/surefire-reports/*.xml'
-                    }
+            
+        }
+        stage('unitTest'){
+           agent {label 'Linux_Slave'}
+            steps{
+                git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
+                sh 'mvn test'
+                
+            }
+            post{
+                success{
+                    junit 'target/surefire-reports/*.xml'
                 }
                 
             }
-            stage('MetricCheck'){
-                agent any
-                steps{
-                    sh 'mvn cobertura:cobertura -Dcobertura.report.format=xml'
-                }
-                post{
-                    always{
-                        cobertura coberturaReportFile: 'target/site/cobertura/coverage.xml'
-                    }
-                }
+            
+        }
+         stage('metricCheck'){
+           agent {label 'Linux_Centos_Slave'}
+            steps{
+                git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
+                sh 'mvn cobertura:cobertura -Dcobertura.report.format=xml'
+                
             }
-            stage('Package'){
-                agent any
-                steps{
-                    sh 'mvn package'
+            post{
+                success{
+                    cobertura coberturaReportFile: 'target/site/cobertura/coverage.xml '
                 }
+                
             }
+            
+        }
+         stage('package'){
+           agent any
+            steps{
+                
+                sh 'mvn package'
+                
+            }
+            
+            
+        }
     }
 }
