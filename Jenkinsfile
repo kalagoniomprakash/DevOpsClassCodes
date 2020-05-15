@@ -1,4 +1,5 @@
 pipeline{
+    properties([[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git/'], pipelineTriggers([githubPush()])])
     tools {
       jdk 'JAVA_HOME'
       git 'mygit'
