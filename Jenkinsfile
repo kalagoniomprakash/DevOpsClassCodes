@@ -18,7 +18,7 @@ pipeline{
             agent any
             steps{
                 sh 'mvn compile'
-                
+                build job: 'codereviewSonarQube'
             }
             
         }
