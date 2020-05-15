@@ -5,10 +5,9 @@ pipeline{
       maven 'myMaven'
     }
     agent none
-    triggers {
-  pollSCM '*/2 * * * *'
-}
-    
+    script{
+  properties([[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git/'], pipelineTriggers([githubPush()])])
+    }
        stages{
         stage('checkout'){
             agent any
