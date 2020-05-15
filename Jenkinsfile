@@ -39,6 +39,7 @@ pipeline{
             steps{
                 withSonarQubeEnv('mySonar'){
                     git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
+                    sh 'mvn compile'
                     sh 'mvn sonar:sonar' 
                 }
                
