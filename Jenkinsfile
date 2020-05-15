@@ -14,8 +14,8 @@ pipeline{
             
         }
         stage('compile'){
+            triggers { upstream(upstreamProjects: 'checkout', threshold: hudson.model.Result.SUCCESS) }
             agent any
-             triggers { upstream(upstreamProjects: 'checkout', threshold: hudson.model.Result.SUCCESS) }
             steps{
                 sh 'mvn compile'
                 
