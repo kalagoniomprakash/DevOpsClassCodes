@@ -14,7 +14,7 @@ pipeline{
               properties([[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git/'], pipelineTriggers([githubPush()])])
                 }
     
-                git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
+                
             }
             
         }
