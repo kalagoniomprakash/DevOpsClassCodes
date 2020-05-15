@@ -1,11 +1,11 @@
 pipeline{
-    properties([[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git/'], pipelineTriggers([githubPush()])])
     tools {
       jdk 'JAVA_HOME'
       git 'mygit'
       maven 'myMaven'
     }
     agent none
+    options([[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git/'], pipelineTriggers([githubPush()])])
        stages{
         stage('checkout'){
             agent any
