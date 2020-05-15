@@ -5,8 +5,7 @@ pipeline{
       maven 'myMaven'
     }
     agent none
-    triggers { upstream(upstreamProjects: 'compile,unitTest,codereview,codereviewSonarQube,metricCheck,package', threshold: hudson.model.Result.SUCCESS) }
-    stages{
+       stages{
         stage('checkout'){
             agent any
             steps{
@@ -16,6 +15,7 @@ pipeline{
         }
         stage('compile'){
             agent any
+             triggers { upstream(upstreamProjects: 'checkout', threshold: hudson.model.Result.SUCCESS) }
             steps{
                 sh 'mvn compile'
                 
