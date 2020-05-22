@@ -11,5 +11,11 @@ CMD "catalina.sh" "run"
 EXPOSE 8080
 EOT
 sudo systemctl start docker
-sudo docker build -t myimage:$BUILD_NUMBER .
-sudo docker run -itd -p 8006:8080 myimage:$BUILD_NUMBER
+sudo docker build -t myaddressapp:$BUILD_NUMBER .
+sudo docker tag myaddressapp:$BUILD_NUMBER 8019014752/addressbookapp:$BUILD_NUMBER
+touch my_password.txt
+cat <<EOT>> my_password.txt
+Saibaba123##
+EOT
+cat /var/lib/jenkins/workspace/DeployJob/Docker-jenkins/my_password.txt | sudo docker login --username 8019014752 --password-stdin
+sudo docker push 8019014752/addressbookapp:$BUILD_NUMBER
