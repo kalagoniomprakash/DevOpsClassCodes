@@ -1,3 +1,6 @@
-FROM ubuntu
+FROM tomcat
 MAINTAINER kalagoni.omprakash@gmail.com
-CMD ["echo", "hi"]
+WORKDIR /usr/local/tomcat/webapps
+COPY target/addressbook.war /usr/local/tomcat/webapps
+CMD ["catalina.sh", "run"]
+EXPOSE 8000
