@@ -1,0 +1,115 @@
+pipeline{
+    tools{
+         jdk 'myJava'
+         git 'mygit'
+         maven 'mymaven'
+         
+   }
+   environment {
+    number_build = '$BUILD_NUMBER' // Added variable
+  }
+   options {
+            buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '7', numToKeepStr: '3')
+   }
+
+    agent none
+    stages{
+           stage('checkout')
+           {
+                agent { label 'Node_Ubuntu' }
+                steps{
+                     git 'https://github.com/kalagoniomprakash/DevOpsClassCodes.git'
+                      
+                }
+                 
+            }
+            stage('compile'){
+                agent { label 'Node_Ubuntu'}
+                steps{
+                    sh 'mvn compile'
+                }
+            }
+            stage('codereview'){
+                agent { label 'Node_Ubuntu'}
+                steps {
+                    sh 'mvn pmd:pmd'
+                }
+                post{
+                    success{
+                        pmd pattern: 'target/pmd.xml'
+                    }
+                }
+            }
+            stage('unit test')
+            {
+                agent { label 'Node_Ubuntu'}
+                steps {
+                    sh 'mvn test'
+                }
+                post{
+                    success{
+                        junit 'target/surefire-reports/*.xml'
+                    }
+                }
+                
+            }
+            stage('metric check')
+            {
+                agent { label 'Node_Ubuntu' }
+                steps{
+                    sh 'mvn cobertura:cobertura -Dcobertura.report.format=xml'
+                }
+                post{
+                    success{
+                           cobertura coberturaReportFile: 'target/site/cobertura/coverage.xml'
+                    }
+                }
+                
+            }
+            stage('package')
+            {
+                agent { label 'Node_Ubuntu' }
+                steps{
+                    sh 'mvn package'
+                }
+            }
+            stage('Build Image & Deploy: Dockerfile with Ansible')
+            {
+                agent{label 'Node_Ubuntu'}
+                steps{
+                   
+                    ansiblePlaybook(playbook: '/home/ubuntu/ansible/deployapplocal.yml')
+                }
+            }
+            stage('Testing Addressbook Application')
+            {
+                agent { label 'Window_Test' }
+                steps{
+                     git 'https://github.com/kalagoniomprakash/testproj.git'
+                     bat 'mvn compile'
+                     bat 'mvn test'
+                }
+            }
+            stage('Pushing the updated Image to Docker hub')
+            {
+                agent{label 'Node_Ubuntu'}
+                steps{
+                   
+                    ansiblePlaybook(playbook: '/home/ubuntu/ansible/pushImage.yml')
+                }
+            }
+            stage('Deploy Prod using ansible playbook')
+            {
+                agent {
+                        node {label 'Node_Ubuntu' } 
+                }
+                          
+                steps{
+                   
+                    ansiblePlaybook(playbook: '/home/ubuntu/ansible/deploy.yml')
+                }
+            }
+            
+    }
+    
+}
