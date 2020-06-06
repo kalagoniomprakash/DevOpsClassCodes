@@ -1,0 +1,102 @@
+---
+- name: Deploying addressbook application
+  hosts: localhost
+  become: true
+  become_user: ubuntu
+  vars:
+    - Build_Number: "{{ lookup('env','BUILD_NUMBER') }}"
+  tasks:
+  - name: install docker
+    command: sudo apt-get install docker.io -y
+  - name: start docker
+    command: sudo systemctl start docker
+  - name: stop the running container
+    command: sudo docker stop demo
+    ignore_errors: yes
+  - name: removing running container
+    command: sudo docker rm demo
+    ignore_errors: yes
+  - name: delete the images
+    command: sudo docker rmi -f $(docker images -aq)
+    ignore_errors: yes
+  - name: build the dockerfile
+    command: sudo docker build -t projectaddressbook:{{ Build_Number }} /home/ubuntu/jenkinsDir/workspace/Address_Book_Java_Pipeline_Job
+  - name: run the container
+    command: sudo docker run -itd -p 8001:8080 --name demo projectaddressbook:{{ Build_Number }}
+
+    
+
+
+    
+---
+- name: Pushing the Image to Docker HUB
+  hosts: localhost
+  become: true
+  become_user: ubuntu
+  vars:
+   - Build_Number: "{{ lookup('env', 'BUILD_NUMBER') }}"
+  tasks:
+  - name: Docker Hub Login
+    docker_login:
+       username: "8019014752"
+       password: "Saibaba123##"
+  - name: Pushing the update with test cases passed image to DockerHUB
+    docker_image:
+       name: projectaddressbook:{{ Build_Number }}
+       repository: 8019014752/projectaddressbook:{{ Build_Number }}
+       push: yes
+       source: local
+       
+       
+
+---
+- name: Deploying Address Book Application to Prod server
+  hosts: prodserver
+  become: true
+  become_user: ubuntu
+  vars:
+   Build_Number: "{{ lookup('env','BUILD_NUMBER') }}"
+  tasks:
+  - name: apt-update
+    command: sudo apt-get update -y
+  - name: Install Docker
+    command: sudo apt-get install docker.io -y
+  - name: start Docker
+    command: sudo systemctl start docker
+  - name: deleting the image
+    command: sudo docker rmi 8019014752/projectaddressbook:{{ Build_Number }}
+    ignore_errors: yes
+  - name: deleting the addressapp image
+    command: sudo docker rmi addressapp
+    ignore_errors: yes
+  - name: Pulling image from docker hub
+    command: sudo docker pull 8019014752/projectaddressbook:{{ Build_Number }}
+  - name: stop the running container
+    command: sudo docker stop addressapp
+    ignore_errors: yes
+  - name: deleting the running container
+    command: sudo docker rm addressapp
+    ignore_errors: yes
+  - name: running the container
+
+
+       
+       
+       
+       
+       
+       steps
+                {
+                  
+                  sh 'sudo systemctl start docker'
+                  sh 'sudo docker build -t addressbook:$BUILD_NUMBER .'
+                  sh 'sudo docker tag addressbook:$BUILD_NUMBER 8019014752/projectaddressbook:$BUILD_NUMBER'
+                  sh 'sudo docker stop demo'
+                  sh 'sudo docker rm demo'
+                  sh 'sudo docker run -itd -p 8001:8080 --name demo 8019014752/projectaddressbook:$BUILD_NUMBER'
+                  sh 'sudo cat /home/ubuntu/.mypassword.txt | sudo docker login --username 8019014752 --password-stdin'
+                  sh 'sudo docker push 8019014752/projectaddressbook:$BUILD_NUMBER'
+                  
+        
+                }
+  
